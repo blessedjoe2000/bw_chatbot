@@ -26,6 +26,7 @@ export default function Home() {
     }
     setIsLoading(false);
   };
+
   const quickPrompt = async (e) => {
     const query = e.target.innerHTML;
 
@@ -42,8 +43,6 @@ export default function Home() {
       console.log("An error occured ", error);
     }
   };
-
-  console.log("messages :>> ", messages);
 
   return (
     <div className="flex flex-col gap-2 justify-center items-center h-lvh px-10">
@@ -64,21 +63,7 @@ export default function Home() {
           How beneficial is sustainability?
         </button>
       </div>
-      <div className="text-white flex flex-col gap-1">
-        {messages &&
-          messages.map((message, index) =>
-            message.role === "user" ? (
-              <p className="p-2 bg-blue-500 text-right" key={index}>
-                {message.content}
-              </p>
-            ) : (
-              <p className="p-2 bg-green-500" key={index}>
-                {message.content}
-              </p>
-            )
-          )}
-        {isLoading && <div>Please wait...</div>}
-      </div>
+
       <form onSubmit={handleSubmit} className="flex">
         <input
           placeholder="Type here... Ask about socially responsible questions "
@@ -97,6 +82,22 @@ export default function Home() {
           send
         </button>
       </form>
+
+      <div className="text-white flex flex-col gap-1">
+        {messages &&
+          messages.map((message, index) =>
+            message.role === "user" ? (
+              <p className="p-2 bg-blue-500 text-right" key={index}>
+                {message.content}
+              </p>
+            ) : (
+              <p className="p-2 bg-green-500" key={index}>
+                {message.content}
+              </p>
+            )
+          )}
+        {isLoading && <div>Please wait...</div>}
+      </div>
     </div>
   );
 }
