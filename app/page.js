@@ -64,26 +64,7 @@ export default function Home() {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex">
-        <input
-          placeholder="Type here... Ask about socially responsible questions "
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="text-black"
-        />
-        <button
-          disabled={isLoading || query === ""}
-          className={
-            isLoading || query === ""
-              ? "rounded-lg px-2 py-1 ml-2 cursor-not-allowed bg-slate-500"
-              : "rounded-lg px-2 py-1 ml-2 bg-blue-500 "
-          }
-        >
-          send
-        </button>
-      </form>
-
-      <div className="text-white flex flex-col gap-1">
+      <div className="chat-container flex flex-col gap-1">
         {messages &&
           messages.map((message, index) =>
             message.role === "user" ? (
@@ -98,6 +79,25 @@ export default function Home() {
           )}
         {isLoading && <div>Please wait...</div>}
       </div>
+
+      <form onSubmit={handleSubmit} className="flex">
+        <input
+          placeholder="Type here... Ask about socially responsible questions "
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className=" outline-dotted rounded-md"
+        />
+        <button
+          disabled={isLoading || query === ""}
+          className={
+            isLoading || query === ""
+              ? "rounded-lg px-2 py-1 ml-2 cursor-not-allowed bg-slate-500"
+              : "rounded-lg px-2 py-1 ml-2 bg-blue-500 "
+          }
+        >
+          send
+        </button>
+      </form>
     </div>
   );
 }
