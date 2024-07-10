@@ -8,6 +8,8 @@ export default function Home() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const endPoint = process.env.NEXT_PUBLIC_API_URL;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -19,7 +21,9 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post("/api/assistant", { newMessage });
+      const response = await axios.post(`${endPoint}/api/assistant`, {
+        newMessage,
+      });
       setMessages((prev) => [...prev, { content: response.data, role: "AI" }]);
     } catch (error) {
       console.log("An error occured ", error);
@@ -36,7 +40,9 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post("/api/assistant", { newMessage });
+      const response = await axios.post(`${endPoint}/api/assistant`, {
+        newMessage,
+      });
       setMessages((prev) => [...prev, { content: response.data, role: "AI" }]);
       setIsLoading(false);
     } catch (error) {
