@@ -30,6 +30,8 @@ export async function POST(req, res) {
       throw new Error("No valid response");
     }
 
+    console.log("answer :>> ", answer);
+
     return new Response(JSON.stringify(answer));
   } catch (error) {
     return new Response(
