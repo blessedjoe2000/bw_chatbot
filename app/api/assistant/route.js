@@ -34,8 +34,6 @@ export async function POST(req, res) {
       contents: `${query}`,
     });
 
-    console.log(response.text);
-
     const answer = response.text;
 
     if (!answer) {
