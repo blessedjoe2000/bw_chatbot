@@ -1,30 +1,42 @@
-import OpenAI from "openai";
+// import OpenAI from "openai";
 
-const openai = new OpenAI();
+import { GoogleGenAI } from "@google/genai";
+// The client gets the API key from the environment variable `GEMINI_API_KEY`.
+const ai = new GoogleGenAI({});
 
-const thread = await openai.beta.threads.create();
+// const openai = new OpenAI();
+
+// const thread = await openai.beta.threads.create();
 
 export async function POST(req, res) {
   try {
     const { newMessage } = await req.json();
     const query = newMessage.content;
 
-    const assistantId = process.env.BETTERBOT_ASST_ID;
+    // const assistantId = process.env.BETTERBOT_ASST_ID;
 
-    await openai.beta.threads.messages.create(thread.id, {
-      role: "user",
-      content: query,
+    // await openai.beta.threads.messages.create(thread.id, {
+    //   role: "user",
+    //   content: query,
+    // });
+
+    // const run = await openai.beta.threads.runs.create(thread.id, {
+    //   assistant_id: assistantId,
+    // });
+
+    // await checkRunStatus(thread.id, run.id);
+
+    // const messages = await openai.beta.threads.messages.list(thread.id);
+    // const answer = messages?.data[0]?.content[0]?.text?.value;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: `${query}`,
     });
 
-    const run = await openai.beta.threads.runs.create(thread.id, {
-      assistant_id: assistantId,
-    });
+    console.log(response.text);
 
-    await checkRunStatus(thread.id, run.id);
-
-    const messages = await openai.beta.threads.messages.list(thread.id);
-
-    const answer = messages?.data[0]?.content[0]?.text?.value;
+    const answer = response.text;
 
     if (!answer) {
       throw new Error("No valid response");
@@ -33,7 +45,7 @@ export async function POST(req, res) {
     return new Response(JSON.stringify(answer));
   } catch (error) {
     return new Response(
-      JSON.stringify({ error: error.message }, { status: 500 })
+      JSON.stringify({ error: error.message }, { status: 500 }),
     );
   }
 }
