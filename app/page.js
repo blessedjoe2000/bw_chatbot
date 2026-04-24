@@ -44,13 +44,18 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`/api/assistant`, {
-        newMessage,
-      });
+      const response = await axios.post(`/api/assistant`, { newMessage });
 
-      setMessages((prev) => [...prev, { content: response.data, role: "AI" }]);
+      setMessages((prev) => [
+        ...prev,
+        { content: response.data.message, role: "AI" },
+      ]);
     } catch (error) {
-      console.log("An error occured ", error);
+      const errMsg =
+        error?.response?.data?.error?.message ||
+        " Something went wrong. Please try again.";
+
+      setMessages((prev) => [...prev, { content: errMsg, role: "AI" }]);
     }
 
     setIsLoading(false);
@@ -69,11 +74,27 @@ export default function Home() {
 
       console.log("response from assistant ", response.data);
 
-      const aiResponse =
-        response?.data?.payload ||
-        response?.data?.message ||
-        response?.data ||
-        "No response received";
+      try {
+        const response = await axios.post(`/api/assistant`, {
+          newMessage,
+        });
+
+        const aiResponse = extractText(response.data);
+
+        setMessages((prev) => [...prev, { content: aiResponse, role: "AI" }]);
+      } catch (error) {
+        console.error("FULL ERROR:", error?.response || error);
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            content: "⚠️ Failed to get response. Please try again.",
+            role: "AI",
+          },
+        ]);
+      }
+
+      const aiResponse = extractText(response.data);
 
       setMessages((prev) => [...prev, { content: aiResponse, role: "AI" }]);
     } catch (error) {
@@ -126,7 +147,11 @@ export default function Home() {
                 }`}
               >
                 <div className="prose prose-sm sm:prose-base max-w-none leading-relaxed">
-                  <ReactMarkdown>{message.content}</ReactMarkdown>
+                  <ReactMarkdown>
+                    {typeof message.content === "string"
+                      ? message.content
+                      : JSON.stringify(message.content)}
+                  </ReactMarkdown>
                 </div>
               </div>
             </div>
