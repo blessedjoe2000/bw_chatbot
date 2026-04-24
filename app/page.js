@@ -44,18 +44,16 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`/api/assistant`, { newMessage });
+      const response = await axios.post(`/api/assistant`, {
+        newMessage,
+      });
 
-      setMessages((prev) => [
-        ...prev,
-        { content: response.data.message, role: "AI" },
-      ]);
+      console.log("response from assistant ", response.data);
+      const aiResponse = response.data.message;
+
+      setMessages((prev) => [...prev, { content: aiResponse, role: "AI" }]);
     } catch (error) {
-      const errMsg =
-        error?.response?.data?.error?.message ||
-        " Something went wrong. Please try again.";
-
-      setMessages((prev) => [...prev, { content: errMsg, role: "AI" }]);
+      console.log("An error occured ", error);
     }
 
     setIsLoading(false);
@@ -74,31 +72,19 @@ export default function Home() {
 
       console.log("response from assistant ", response.data);
 
-      try {
-        const response = await axios.post(`/api/assistant`, {
-          newMessage,
-        });
-
-        const aiResponse = extractText(response.data);
-
-        setMessages((prev) => [...prev, { content: aiResponse, role: "AI" }]);
-      } catch (error) {
-        console.error("FULL ERROR:", error?.response || error);
-
-        setMessages((prev) => [
-          ...prev,
-          {
-            content: "⚠️ Failed to get response. Please try again.",
-            role: "AI",
-          },
-        ]);
-      }
-
-      const aiResponse = extractText(response.data);
+      const aiResponse = response.data.message;
 
       setMessages((prev) => [...prev, { content: aiResponse, role: "AI" }]);
     } catch (error) {
       console.error("An error occured, FULL ERROR:", error?.response || error);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          content: "Failed to get response. Please try again.",
+          role: "AI",
+        },
+      ]);
     }
 
     setIsLoading(false);
@@ -147,11 +133,7 @@ export default function Home() {
                 }`}
               >
                 <div className="prose prose-sm sm:prose-base max-w-none leading-relaxed">
-                  <ReactMarkdown>
-                    {typeof message.content === "string"
-                      ? message.content
-                      : JSON.stringify(message.content)}
-                  </ReactMarkdown>
+                  <ReactMarkdown>{message.content}</ReactMarkdown>
                 </div>
               </div>
             </div>

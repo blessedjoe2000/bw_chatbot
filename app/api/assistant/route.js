@@ -38,12 +38,18 @@ export async function POST(req, res) {
       );
     }
 
+    console.log("query backend", query);
+
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `${query}`,
     });
 
+    console.log("response backend", response);
+
     const answer = response.text;
+
+    console.log("response from assistant backend", response);
 
     if (!answer) {
       throw new Error("No valid response");
