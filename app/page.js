@@ -67,9 +67,17 @@ export default function Home() {
         newMessage,
       });
 
-      setMessages((prev) => [...prev, { content: response.data, role: "AI" }]);
+      console.log("response from assistant ", response.data);
+
+      const aiResponse =
+        response?.data?.payload ||
+        response?.data?.message ||
+        response?.data ||
+        "No response received";
+
+      setMessages((prev) => [...prev, { content: aiResponse, role: "AI" }]);
     } catch (error) {
-      console.log("An error occured ", error);
+      console.error("An error occured, FULL ERROR:", error?.response || error);
     }
 
     setIsLoading(false);
