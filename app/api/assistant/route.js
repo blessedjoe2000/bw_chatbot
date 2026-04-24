@@ -40,28 +40,41 @@ export async function POST(req, res) {
 
     console.log("query backend", query);
 
-    async function generateWithRetry(query, retries = 2) {
+    const timeout = (ms) =>
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("TIMEOUT")), ms),
+      );
+
+    async function generateWithRetry(query) {
       try {
-        const response = await ai.models.generateContent({
+        return await ai.models.generateContent({
           model: "gemini-3-flash-preview",
           contents: query,
         });
-
-        return response;
       } catch (error) {
-        const message = error?.message || "";
+        const msg = error?.message || "";
 
-        if (retries > 0 && message.includes("503")) {
-          // wait before retrying
-          await new Promise((res) => setTimeout(res, 1500));
-          return generateWithRetry(query, retries - 1);
+        // Retry ONLY once for 503
+        if (msg.includes("503")) {
+          await new Promise((res) => setTimeout(res, 10000));
+
+          return await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: query,
+          });
         }
 
         throw error;
       }
     }
 
-    const response = await generateWithRetry(query);
+    const aiPromise = generateWithRetry(query);
+
+    // ⏱️ HARD LIMIT (VERY IMPORTANT)
+    const response = await Promise.race([
+      aiPromise,
+      timeout(20000), // keep under Vercel limit
+    ]);
 
     // const response = await ai.models.generateContent({
     //   // model: "gemini-3-flash-preview",
@@ -83,17 +96,14 @@ export async function POST(req, res) {
   } catch (error) {
     console.error("API ERROR:", error);
 
-    return new Response(
-      JSON.stringify({
-        error: {
-          message:
-            error?.message ||
-            "The AI service is currently unavailable. Please try again.",
-          code: 500,
-        },
-      }),
-      { status: 500 },
-    );
+    const message =
+      error.message === "TIMEOUT"
+        ? "⏱️ The request took too long. Please try again."
+        : "⚠️ The AI is currently busy. Please try again.";
+
+    return new Response(JSON.stringify({ error: { message } }), {
+      status: 500,
+    });
   }
 }
 
