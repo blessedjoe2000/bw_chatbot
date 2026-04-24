@@ -40,10 +40,34 @@ export async function POST(req, res) {
 
     console.log("query backend", query);
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `${query}`,
-    });
+    async function generateWithRetry(query, retries = 2) {
+      try {
+        const response = await ai.models.generateContent({
+          model: "gemini-3-flash-preview",
+          contents: query,
+        });
+
+        return response;
+      } catch (error) {
+        const message = error?.message || "";
+
+        if (retries > 0 && message.includes("503")) {
+          // wait before retrying
+          await new Promise((res) => setTimeout(res, 1500));
+          return generateWithRetry(query, retries - 1);
+        }
+
+        throw error;
+      }
+    }
+
+    const response = await generateWithRetry(query);
+
+    // const response = await ai.models.generateContent({
+    //   // model: "gemini-3-flash-preview",
+    //   model: "gemini-pro",
+    //   contents: `${query}`,
+    // });
 
     console.log("response backend", response);
 

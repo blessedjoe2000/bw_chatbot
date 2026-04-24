@@ -53,7 +53,15 @@ export default function Home() {
 
       setMessages((prev) => [...prev, { content: aiResponse, role: "AI" }]);
     } catch (error) {
-      console.log("An error occured ", error);
+      console.error("An error occured, FULL ERROR:", error?.response || error);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          content: "Failed to get response. Please try again.",
+          role: "AI",
+        },
+      ]);
     }
 
     setIsLoading(false);
