@@ -48,7 +48,6 @@ export default function Home() {
         newMessage,
       });
 
-      console.log("response from assistant ", response.data);
       const aiResponse = response.data.message;
 
       setMessages((prev) => [...prev, { content: aiResponse, role: "AI" }]);
@@ -77,8 +76,6 @@ export default function Home() {
       const response = await axios.post(`/api/assistant`, {
         newMessage,
       });
-
-      console.log("response from assistant ", response.data);
 
       const aiResponse = response.data.message;
 
