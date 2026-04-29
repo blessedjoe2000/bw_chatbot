@@ -38,55 +38,12 @@ export async function POST(req, res) {
       );
     }
 
-    console.log("query backend", query);
-
-    const timeout = (ms) =>
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("TIMEOUT")), ms),
-      );
-
-    async function generateWithRetry(query) {
-      try {
-        return await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
-          contents: query,
-        });
-      } catch (error) {
-        const msg = error?.message || "";
-
-        // Retry ONLY once for 503
-        if (msg.includes("503")) {
-          await new Promise((res) => setTimeout(res, 10000));
-
-          return await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: query,
-          });
-        }
-
-        throw error;
-      }
-    }
-
-    const aiPromise = generateWithRetry(query);
-
-    // ⏱️ HARD LIMIT (VERY IMPORTANT)
-    const response = await Promise.race([
-      aiPromise,
-      timeout(20000), // keep under Vercel limit
-    ]);
-
-    // const response = await ai.models.generateContent({
-    //   // model: "gemini-3-flash-preview",
-    //   model: "gemini-pro",
-    //   contents: `${query}`,
-    // });
-
-    console.log("response backend", response);
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: `${query}`,
+    });
 
     const answer = response.text;
-
-    console.log("response from assistant backend", response);
 
     if (!answer) {
       throw new Error("No valid response");
@@ -98,8 +55,8 @@ export async function POST(req, res) {
 
     const message =
       error.message === "TIMEOUT"
-        ? "⏱️ The request took too long. Please try again."
-        : "⚠️ The AI is currently busy. Please try again.";
+        ? "The request took too long. Please try again."
+        : "The AI is currently busy. Please try again.";
 
     return new Response(JSON.stringify({ error: { message } }), {
       status: 500,
